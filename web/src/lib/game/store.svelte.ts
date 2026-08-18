@@ -7,7 +7,8 @@ import type {
 	SeasonRecap,
 	TransferOffer
 } from '$lib/game/types';
-import { assignAcademy } from '$lib/game/academy';
+import { assignAcademy, assignmentFromShf } from '$lib/game/academy';
+import { shfById } from '$lib/data/shf';
 import { clubDefinitionToCurrentClub, generateOffers } from '$lib/game/mercato';
 import { clubById } from '$lib/data/clubs';
 import {
@@ -52,6 +53,7 @@ function emptyCreation() {
 	return {
 		step: 'home' as CreationStep,
 		municipalityId: '',
+		shfId: '',
 		gender: null as Gender | null,
 		position: null as Position | null,
 		name: '',
@@ -226,6 +228,17 @@ class GameStore {
 		this.persistMetaState();
 	}
 
+	selectTeam(shfId: string) {
+		const shf = shfById[shfId];
+		if (!shf) return;
+		this.creation.shfId = shfId;
+		this.creation.municipalityId = shf.municipalityId;
+	}
+
+	clearTeam() {
+		this.creation.shfId = '';
+		this.creation.municipalityId = '';
+	}
 	selectCity(id: string) {
 		this.creation.municipalityId = id;
 	}
@@ -246,7 +259,9 @@ class GameStore {
 
 	confirmName() {
 		if (!this.creation.name || !this.creation.gender || !this.creation.position) return;
-		this.creation.assignment = assignAcademy(this.creation.municipalityId, this.creation.gender);
+		this.creation.assignment = this.creation.shfId
+			? assignmentFromShf(this.creation.shfId)
+			: assignAcademy(this.creation.municipalityId, this.creation.gender);
 		this.creation.interviewStep = 0;
 		this.creation.interviewChoices = [];
 		this.creation.step = 'interview';

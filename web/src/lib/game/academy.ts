@@ -1,4 +1,4 @@
-import { SHF_ACADEMIES, shfByMunicipality } from '$lib/data/shf';
+import { SHF_ACADEMIES, shfById, shfByMunicipality } from '$lib/data/shf';
 import { municipalityById } from '$lib/data/municipalities';
 import { haversineKm } from '$lib/game/geo';
 import type { AcademyAssignment, Gender, Municipality } from '$lib/game/types';
@@ -55,4 +55,22 @@ export function getLrfLabel(lrf: Municipality['lrf']): string {
 		prizren: 'LRF Prizren'
 	};
 	return labels[lrf];
+}
+
+export function assignmentFromShf(shfId: string): AcademyAssignment {
+	const academy = shfById[shfId];
+	if (!academy) throw new Error(`SHF e panjohur: ${shfId}`);
+
+	const home = municipalityById[academy.municipalityId];
+	if (!home) throw new Error(`Komuna e panjohur: ${academy.municipalityId}`);
+
+	const local = shfByMunicipality[academy.municipalityId] ?? [];
+	const isLocal = local.some((s) => s.id === shfId);
+
+	return {
+		type: isLocal ? 'local' : 'nearest',
+		academy,
+		distanceKm: Math.round(haversineKm(home.lat, home.lng, academy.lat, academy.lng) * 10) / 10,
+		homeMunicipality: home
+	};
 }

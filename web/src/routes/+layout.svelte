@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import favicon from '$lib/assets/favicon.svg';
 	import { wireFeedbackBridge } from '$lib/audio/bridge';
+	import { preloadMapLibre } from '$lib/map/initMap';
 	import { game } from '$lib/game/store.svelte';
 	import { randomName } from '$lib/game/names';
 	import { clubById } from '$lib/data/clubs';
@@ -70,7 +71,10 @@
 			['city', 'gender', 'position', 'name', 'interview', 'academy'].includes(game.creation.step)
 	);
 
-	onMount(() => wireFeedbackBridge());
+	onMount(() => {
+		wireFeedbackBridge();
+		preloadMapLibre();
+	});
 </script>
 
 <svelte:head>
@@ -135,8 +139,9 @@
 			/>
 		{:else if !game.save && game.creation.step === 'city'}
 			<KosovoMapScene
-				selectedId={game.creation.municipalityId}
-				onselect={(id) => game.selectCity(id)}
+				selectedShfId={game.creation.shfId}
+				onselect={(id) => game.selectTeam(id)}
+				onclear={() => game.clearTeam()}
 				onconfirm={() => (game.creation.step = 'gender')}
 			/>
 		{:else if !game.save && game.creation.step === 'gender'}

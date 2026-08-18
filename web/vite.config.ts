@@ -39,7 +39,7 @@ export default defineConfig({
 				globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2}'],
 				runtimeCaching: [
 					{
-						urlPattern: /^https:\/\/basemaps\.cartocdn\.com\/.*/i,
+						urlPattern: /^https:\/\/(?:tiles\.)?basemaps\.cartocdn\.com\/.*/i,
 						handler: 'CacheFirst',
 						options: {
 							cacheName: 'mahalla-map-tiles',
