@@ -20,6 +20,10 @@ import {
 } from '$lib/game/engine';
 import { applyInterviewProfile } from '$lib/game/interview';
 import { computeLegendScore, getLegendBadge } from '$lib/game/legend';
+import { applyMatchChoice, generateMatchMoment, type MatchMoment } from '$lib/game/match';
+import { detectNewMilestones, type MilestoneDef } from '$lib/game/milestones';
+import type { TransferAnim } from '$lib/game/transfer';
+import { emitFeedback } from '$lib/game/feedback';
 import {
 	applyLegaciesToPlayer,
 	emptyMeta,
@@ -109,12 +113,18 @@ class GameStore {
 	offers = $state<TransferOffer[]>([]);
 	rng = $state<SeededRng | null>(null);
 	showCareerPanel = $state(false);
-	lastTransferAnim = $state<{ from: string; to: string; km: number } | null>(null);
+	lastTransferAnim = $state<TransferAnim | null>(null);
 	selectedLegacies = $state<string[]>([]);
 	duelConfig = $state<DuelConfig | null>(null);
 	newlyUnlockedLegacies = $state<string[]>([]);
 	careerFinished = $state(false);
 	ready = $state(false);
+	savedAt = $state(Date.now());
+	lastMatch = $state<MatchMoment | null>(null);
+	matchResolved = $state(false);
+	shownMilestones = $state<string[]>([]);
+	pendingMilestone = $state<MilestoneDef | null>(null);
+	pendingNationalCall = $state(false);
 
 	async init() {
 		if (this.ready || typeof window === 'undefined') return;
@@ -158,7 +168,9 @@ class GameStore {
 
 	persist() {
 		if (!this.save) return;
-		void persistSave(JSON.stringify(this.save));
+		void persistSave(JSON.stringify(this.save)).then(() => {
+			this.savedAt = Date.now();
+		});
 	}
 
 	persistMetaState() {
@@ -177,6 +189,11 @@ class GameStore {
 		this.lastTransferAnim = null;
 		this.careerFinished = false;
 		this.newlyUnlockedLegacies = [];
+		this.lastMatch = null;
+		this.matchResolved = false;
+		this.shownMilestones = [];
+		this.pendingMilestone = null;
+		this.pendingNationalCall = false;
 		void clearSave();
 	}
 
@@ -211,7 +228,6 @@ class GameStore {
 
 	selectCity(id: string) {
 		this.creation.municipalityId = id;
-		this.creation.step = 'gender';
 	}
 
 	selectGender(gender: Gender) {
@@ -339,9 +355,12 @@ class GameStore {
 		else this.persist();
 	}
 
+	dismissTransferAnim() {
+		this.lastTransferAnim = null;
+	}
+
 	startEvent() {
 		if (!this.save || !this.rng) return;
-		this.lastTransferAnim = null;
 		if (this.save.player.age >= RETIRE_AGE) {
 			this.finishCareer();
 			return;
@@ -351,11 +370,31 @@ class GameStore {
 		this.persist();
 	}
 
+	private queueMilestones() {
+		if (!this.save) return;
+		const next = detectNewMilestones(this.save, this.shownMilestones);
+		if (next.length > 0 && !this.pendingMilestone) {
+			this.pendingMilestone = next[0];
+		}
+	}
+
+	dismissMilestone() {
+		if (!this.pendingMilestone) return;
+		this.shownMilestones = [...this.shownMilestones, this.pendingMilestone.id];
+		this.pendingMilestone = null;
+		this.queueMilestones();
+	}
+
+	acceptNationalCall() {
+		this.pendingNationalCall = false;
+	}
+
 	chooseEvent(choiceId: string) {
 		if (!this.save || !this.currentEvent || !this.rng) return;
 		const choice = this.currentEvent.choices.find((c) => c.id === choiceId);
 		if (!choice) return;
 
+		const capsBefore = this.save.nationalCaps;
 		const flags = [...this.save.flags];
 		Object.assign(
 			this.save.player,
@@ -366,7 +405,31 @@ class GameStore {
 		this.lastRecap = simulateSeason(this.save, this.rng, choice.effects);
 		this.save.lastRecap = this.lastRecap;
 		this.currentEvent = null;
+		this.matchResolved = false;
+		this.lastMatch = generateMatchMoment(this.save, this.lastRecap, this.rng);
+		this.save.phase = 'match';
+
+		if (this.save.nationalCaps > capsBefore) {
+			this.pendingNationalCall = true;
+		}
+
+		this.persist();
+	}
+
+	resolveMatch(choiceId: string) {
+		if (!this.save || !this.lastMatch) return;
+		applyMatchChoice(this.save.player, choiceId);
+		this.matchResolved = true;
+		emitFeedback('match');
+		this.persist();
+	}
+
+	continueFromMatch() {
+		if (!this.save) return;
+		this.matchResolved = false;
+		this.lastMatch = null;
 		this.save.phase = 'recap';
+		this.queueMilestones();
 		this.persist();
 	}
 
@@ -397,6 +460,9 @@ class GameStore {
 		if (!offer) return;
 
 		const fromName = this.save.currentClub.name;
+		const fromLat = this.save.currentClub.lat;
+		const fromLng = this.save.currentClub.lng;
+		const fromTier = this.save.currentTier;
 		const clubDef = clubById[offer.clubId];
 
 		this.save.careerHistory.push({
@@ -433,10 +499,26 @@ class GameStore {
 			this.save.player.morale = Math.max(10, this.save.player.morale - 3);
 		}
 
-		this.lastTransferAnim = { from: fromName, to: offer.clubName, km: offer.distanceKm };
+		const goingAbroad = offer.tier >= 10 && fromTier < 10;
+		if (goingAbroad && !this.save.flags.includes('adaptim-active')) {
+			this.save.flags.push('adaptim-active');
+		}
+
+		this.lastTransferAnim = {
+			from: fromName,
+			to: offer.clubName,
+			km: offer.distanceKm,
+			fromLat,
+			fromLng,
+			toLat: offer.lat,
+			toLng: offer.lng,
+			tier: offer.tier,
+			abroad: goingAbroad
+		};
 		this.save.careerStage = 'senior';
 		this.offers = [];
 		this.save.offers = [];
+		this.queueMilestones();
 		this.nextSeason();
 	}
 

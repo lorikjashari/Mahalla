@@ -426,6 +426,14 @@ export function simulateSeason(
 	const repMod = p.reputation / 20;
 	let minutes = Math.round(baseMinutes * (1 + formMod * 0.1 + repMod * 0.15));
 	if (p.injured) minutes = Math.round(minutes * 0.4);
+
+	const adaptim = save.flags.includes('adaptim-active');
+	if (adaptim) {
+		p.form = Math.max(40, p.form - 6);
+		p.morale = Math.max(10, p.morale - 5);
+		minutes = Math.round(minutes * 0.85);
+	}
+
 	p.minutes = minutes;
 	p.matches = Math.round(minutes / 70);
 
@@ -455,6 +463,7 @@ export function simulateSeason(
 		{ label: 'Motivimi', value: Math.round((p.morale - 50) * 0.3), positive: p.morale >= 60 }
 	];
 	if (p.injured) causes.push({ label: 'Lëndim', value: -35, positive: false });
+	if (adaptim) causes.push({ label: 'Adaptim jashtë', value: -22, positive: false });
 
 	const tier = getCurrentTier(save);
 
@@ -485,6 +494,10 @@ export function simulateSeason(
 		goals,
 		assists
 	};
+
+	if (adaptim) {
+		save.flags = save.flags.filter((f) => f !== 'adaptim-active');
+	}
 
 	return {
 		...recapBase,

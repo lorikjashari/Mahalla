@@ -11,39 +11,30 @@
 </script>
 
 {#if memories.length > 0}
-	<div class="memory-log">
-		<h3>Kujtesa aktive</h3>
-		<ul>
+	<section class="detail-section memory-log" aria-labelledby="memory-title">
+		<p class="detail-kicker" id="memory-title">Kujtesa aktive</p>
+		<ul class="memory-list">
 			{#each memories as m (m.id)}
 				<li>{m.label}</li>
 			{/each}
 		</ul>
-	</div>
+	</section>
 {/if}
 
 <style>
-	.memory-log {
-		background: var(--surface);
-		border: 1px solid var(--border);
-		border-radius: var(--radius);
-		padding: 0.85rem 1rem;
-		margin: 0.75rem 0;
+	.memory-list {
+		list-style: none;
+		margin: var(--space-3) 0 0;
+		padding: 0;
+		display: grid;
+		gap: var(--space-2);
 	}
 
-	h3 {
-		margin: 0 0 0.5rem;
-		font-size: 0.85rem;
-		color: var(--gold);
-	}
-
-	ul {
-		margin: 0;
-		padding-left: 1.1rem;
-		font-size: 0.82rem;
-		color: var(--muted);
-	}
-
-	li {
-		margin-bottom: 0.25rem;
+	.memory-list li {
+		font-size: var(--text-sm);
+		color: var(--text-dim);
+		line-height: 1.45;
+		padding-left: var(--space-3);
+		border-left: 2px solid var(--line-strong);
 	}
 </style>

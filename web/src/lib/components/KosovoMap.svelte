@@ -69,17 +69,27 @@
 		fill: var(--accent);
 		opacity: 0.55;
 		cursor: pointer;
-		transition: all 0.15s ease;
-	}
-
-	.municipality:hover circle,
-	.municipality:focus circle {
-		opacity: 1;
-		r: 3;
+		transition: all var(--duration-normal) var(--ease-out);
 	}
 
 	.municipality.selected circle {
 		fill: var(--gold);
+		opacity: 1;
+		animation: pulse 1.6s ease-in-out infinite;
+	}
+
+	@keyframes pulse {
+		0%,
+		100% {
+			filter: drop-shadow(0 0 0 rgba(212, 168, 83, 0));
+		}
+		50% {
+			filter: drop-shadow(0 0 6px rgba(212, 168, 83, 0.8));
+		}
+	}
+
+	.municipality:hover circle,
+	.municipality:focus circle {
 		opacity: 1;
 	}
 

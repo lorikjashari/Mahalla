@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { SeasonHistoryEntry } from '$lib/game/types';
+	import { sq } from '$lib/i18n/sq';
 
 	interface Props {
 		history: SeasonHistoryEntry[];
@@ -26,12 +27,12 @@
 	);
 </script>
 
-<div class="charts">
-	<h3>Progresi yt</h3>
+<section class="detail-section charts" aria-labelledby="charts-title">
+	<p class="detail-kicker" id="charts-title">{sq.chartsTitle}</p>
 
 	<div class="chart-block">
-		<span class="chart-label">Vlerësimi (OVR)</span>
-		<svg viewBox="0 0 100 45" class="chart-svg">
+		<span class="chart-label">{sq.chartsOvr}</span>
+		<svg viewBox="0 0 100 45" class="chart-svg" role="img" aria-label={sq.chartsOvr}>
 			<polyline points={linePoints} class="ovr-line" fill="none" />
 			{#each recent as h, i (h.season)}
 				{@const x = 8 + (i / Math.max(recent.length - 1, 1)) * 84}
@@ -42,7 +43,7 @@
 	</div>
 
 	<div class="chart-block">
-		<span class="chart-label">Minuta (%)</span>
+		<span class="chart-label">{sq.chartsMinutes}</span>
 		<div class="bars">
 			{#each recent as h (h.season)}
 				<div class="bar-col" title="{h.season}: {h.minutesPct}%">
@@ -52,47 +53,33 @@
 			{/each}
 		</div>
 	</div>
-</div>
+</section>
 
 <style>
-	.charts {
-		background: var(--surface);
-		border: 1px solid var(--border);
-		border-radius: var(--radius);
-		padding: 1rem;
-		margin: 1rem 0;
-	}
-
-	h3 {
-		margin: 0 0 0.75rem;
-		font-size: 0.95rem;
-		color: var(--gold);
-	}
-
 	.chart-block {
-		margin-bottom: 1rem;
+		margin-top: var(--space-4);
 	}
 
-	.chart-block:last-child {
-		margin-bottom: 0;
+	.chart-block + .chart-block {
+		margin-top: var(--space-5);
 	}
 
 	.chart-label {
-		font-size: 0.75rem;
-		color: var(--muted);
 		display: block;
-		margin-bottom: 0.35rem;
+		margin-bottom: var(--space-2);
+		font-size: var(--text-2xs);
+		text-transform: uppercase;
+		letter-spacing: 0.12em;
+		color: var(--muted);
 	}
 
 	.chart-svg {
 		width: 100%;
 		height: auto;
-		background: rgba(0, 0, 0, 0.2);
-		border-radius: 8px;
 	}
 
 	.ovr-line {
-		stroke: var(--accent);
+		stroke: var(--accent-bright);
 		stroke-width: 1.2;
 	}
 
@@ -109,10 +96,9 @@
 		display: flex;
 		align-items: flex-end;
 		gap: 4px;
-		height: 64px;
-		padding: 0 4px;
-		background: rgba(0, 0, 0, 0.2);
-		border-radius: 8px;
+		height: 72px;
+		padding-top: var(--space-2);
+		border-top: 1px solid var(--line);
 	}
 
 	.bar-col {
@@ -126,15 +112,14 @@
 
 	.bar {
 		width: 100%;
-		max-width: 24px;
+		max-width: 20px;
 		background: linear-gradient(180deg, var(--gold), var(--accent));
-		border-radius: 3px 3px 0 0;
 		min-height: 4px;
 	}
 
 	.bar-col small {
-		font-size: 0.6rem;
+		font-size: 0.55rem;
 		color: var(--muted);
-		margin-top: 2px;
+		margin-top: 4px;
 	}
 </style>

@@ -11,6 +11,7 @@ export type GamePhase =
 	| 'interview'
 	| 'academy'
 	| 'event'
+	| 'match'
 	| 'recap'
 	| 'market'
 	| 'retire'

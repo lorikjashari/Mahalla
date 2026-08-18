@@ -2,7 +2,10 @@
 	import type { MahallaSave } from '$lib/game/types';
 	import { computeLegendScore, getLegendBadge, getRivalVerdict } from '$lib/game/legend';
 	import { getTierLabel } from '$lib/data/clubs';
+	import { municipalityById } from '$lib/data/municipalities';
+	import { isDailySeed } from '$lib/game/meta';
 	import ClubLogo from '$lib/components/ClubLogo.svelte';
+	import { sq } from '$lib/i18n/sq';
 
 	interface Props {
 		save: MahallaSave;
@@ -13,111 +16,116 @@
 	const score = $derived(computeLegendScore(save));
 	const badge = $derived(getLegendBadge(save));
 	const verdict = $derived(getRivalVerdict(save));
+	const city = $derived(municipalityById[save.municipalityId]?.name ?? save.municipalityId);
+	const modeTag = $derived(
+		save.duelMode ? sq.duelMode : isDailySeed(save.seed) ? sq.dailyChallenge : null
+	);
 </script>
 
-<div class="legend-card" id="legend-card">
-	<p class="badge">{badge}</p>
-	<h2>{save.player.name}</h2>
-	<p class="score">{score} pikë karriere</p>
+<article class="legend-cover" id="legend-card">
+	<p class="kicker">{badge}{#if modeTag} · {modeTag}{/if}</p>
+	<h2 class="display-mega">{save.player.name}</h2>
+	<p class="origin">{city} · {save.player.position}</p>
+	<p class="score-line">{score} {sq.legendPoints}</p>
 
-	<div class="club-row">
+	<div class="club-block">
 		<ClubLogo
 			name={save.currentClub.name}
 			initials={save.currentClub.initials}
 			colors={save.currentClub.colors}
 			logoUrl={save.currentClub.logoUrl}
-			size="lg"
+			size="md"
 		/>
 		<div>
-			<p><strong>{save.currentClub.name}</strong></p>
-			<p class="meta">{getTierLabel(save.currentTier)} · {save.player.age} vjeç</p>
+			<p class="club-name">{save.currentClub.name}</p>
+			<p class="meta">{getTierLabel(save.currentTier)} · {save.player.age} {sq.yearsOld}</p>
 		</div>
 	</div>
 
-	<div class="stats-row">
-		<div><span>{save.player.goals}</span><small>Gola</small></div>
-		<div><span>{save.player.assists}</span><small>Asistime</small></div>
-		<div><span>{save.nationalCaps}</span><small>Kombëtarja</small></div>
-		<div><span>{save.careerHistory.length}</span><small>Klube</small></div>
+	<div class="info-rail">
+		<div class="info-rail-item">
+			<span>{sq.legendGoals}</span>
+			<strong>{save.player.goals}</strong>
+		</div>
+		<div class="info-rail-item">
+			<span>{sq.legendAssists}</span>
+			<strong>{save.player.assists}</strong>
+		</div>
+		<div class="info-rail-item">
+			<span>{sq.nationalCall}</span>
+			<strong>{save.nationalCaps}</strong>
+		</div>
+		<div class="info-rail-item">
+			<span>{sq.ovr}</span>
+			<strong>{save.player.ovr}</strong>
+		</div>
 	</div>
 
-	<p class="verdict">{verdict}</p>
-	<p class="footer">Mahalla — nga lagjja te legjenda</p>
-</div>
+	<p class="verdict">"{verdict}"</p>
+	<p class="footer">{sq.legendFooter}</p>
+</article>
 
 <style>
-	.legend-card {
-		background: linear-gradient(160deg, #1a2332 0%, #0f1419 100%);
-		border: 2px solid var(--gold);
-		border-radius: var(--radius);
-		padding: 1.25rem;
-		text-align: center;
+	.legend-cover {
+		padding: var(--space-6) 0;
+		border-top: 2px solid var(--gold-dim);
+		border-bottom: 1px solid var(--line);
+		text-align: left;
 	}
 
-	.badge {
-		color: var(--gold);
-		font-weight: 700;
-		font-size: 0.85rem;
-		margin: 0 0 0.5rem;
+	.origin {
+		margin: var(--space-2) 0 0;
+		font-size: var(--text-sm);
 		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		color: var(--muted);
+	}
+
+	.score-line {
+		margin: var(--space-4) 0;
+		font-family: var(--font-display);
+		font-size: var(--text-2xl);
+		color: var(--gold);
 		letter-spacing: 0.06em;
 	}
 
-	h2 {
-		margin: 0;
-		font-size: 1.5rem;
-	}
-
-	.score {
-		color: var(--muted);
-		margin: 0.25rem 0 1rem;
-	}
-
-	.club-row {
+	.club-block {
 		display: flex;
 		align-items: center;
-		gap: 0.85rem;
-		text-align: left;
-		background: rgba(0, 0, 0, 0.25);
-		padding: 0.75rem;
-		border-radius: 8px;
-		margin-bottom: 1rem;
+		gap: var(--space-3);
+		margin-bottom: var(--space-4);
+	}
+
+	.club-name {
+		margin: 0;
+		font-family: var(--font-display);
+		font-size: var(--text-lg);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
 	}
 
 	.meta {
-		margin: 0;
-		font-size: 0.82rem;
+		margin: 0.2rem 0 0;
+		font-size: var(--text-xs);
 		color: var(--muted);
-	}
-
-	.stats-row {
-		display: grid;
-		grid-template-columns: repeat(4, 1fr);
-		gap: 0.5rem;
-		margin-bottom: 1rem;
-	}
-
-	.stats-row span {
-		display: block;
-		font-size: 1.25rem;
-		font-weight: 800;
-	}
-
-	.stats-row small {
-		color: var(--muted);
-		font-size: 0.65rem;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
 	}
 
 	.verdict {
+		margin: var(--space-4) 0;
+		font-size: var(--text-md);
 		font-style: italic;
-		color: var(--text);
-		margin: 0 0 0.75rem;
-		font-size: 0.9rem;
+		color: var(--text-dim);
+		line-height: 1.5;
+		max-width: 36ch;
 	}
 
 	.footer {
 		margin: 0;
-		font-size: 0.7rem;
+		font-size: var(--text-2xs);
+		text-transform: uppercase;
+		letter-spacing: 0.14em;
 		color: var(--muted);
 	}
 </style>

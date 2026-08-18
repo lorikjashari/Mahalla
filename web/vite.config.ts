@@ -36,7 +36,29 @@ export default defineConfig({
 				]
 			},
 			workbox: {
-				globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2}']
+				globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2}'],
+				runtimeCaching: [
+					{
+						urlPattern: /^https:\/\/basemaps\.cartocdn\.com\/.*/i,
+						handler: 'CacheFirst',
+						options: {
+							cacheName: 'mahalla-map-tiles',
+							expiration: {
+								maxEntries: 250,
+								maxAgeSeconds: 60 * 60 * 24 * 30
+							},
+							cacheableResponse: { statuses: [0, 200] }
+						}
+					},
+					{
+						urlPattern: /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/i,
+						handler: 'StaleWhileRevalidate',
+						options: {
+							cacheName: 'mahalla-fonts',
+							expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 }
+						}
+					}
+				]
 			}
 		})
 	]

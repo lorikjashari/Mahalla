@@ -26,6 +26,7 @@
 		"wrangler": "^4.123.0"
 	},
 	"dependencies": {
-		"html-to-image": "^1.11.13"
+		"html-to-image": "^1.11.13",
+		"maplibre-gl": "^6.4.0"
 	}
 }

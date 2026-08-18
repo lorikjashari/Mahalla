@@ -129,6 +129,32 @@ export function buildDuelLink(seed: string): string {
 	return url.toString();
 }
 
+export function buildDailyLink(key?: string): string {
+	if (typeof window === 'undefined') return '';
+	const daily = key ?? getDailySeedValue().replace('daily-', '');
+	const url = new URL(window.location.href);
+	url.searchParams.set('daily', daily);
+	url.searchParams.delete('duel');
+	url.searchParams.delete('d');
+	return url.origin + url.pathname + url.search;
+}
+
+export function formatDailyLabel(key: string): string {
+	if (key.length !== 8) return key;
+	const y = key.slice(0, 4);
+	const m = key.slice(4, 6);
+	const d = key.slice(6, 8);
+	return `${d}.${m}.${y}`;
+}
+
+export function isDailySeed(seed: string): boolean {
+	return seed.startsWith('daily-');
+}
+
+export function isDuelSeed(seed: string): boolean {
+	return seed.startsWith('duel-');
+}
+
 export function unlockLegaciesFromScore(meta: MahallaMeta, score: number): string[] {
 	const newly: string[] = [];
 	for (const leg of LEGACIES) {

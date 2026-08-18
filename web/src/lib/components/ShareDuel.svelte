@@ -1,6 +1,8 @@
 <script lang="ts">
+	import GameButton from '$lib/ui/GameButton.svelte';
 	import { buildDuelLink } from '$lib/game/meta';
 	import { copyText } from '$lib/game/storage';
+	import { sq } from '$lib/i18n/sq';
 
 	interface Props {
 		seed: string;
@@ -17,37 +19,47 @@
 	}
 </script>
 
-<div class="share-duel">
-	<p>Sfido shokun — i njëjti seed, zgjedhje të ndryshme:</p>
-	<button type="button" class="gold" onclick={share}>
-		{copied ? 'U kopjua! ✓' : 'Kopjo linkun e duelit'}
-	</button>
+<section class="share-duel">
+	<p class="kicker">{sq.duelMode}</p>
+	<p class="body">{sq.duelShareHint}</p>
+	<GameButton variant="gold" full onclick={share}>
+		{copied ? sq.duelCopied : sq.shareDuel}
+	</GameButton>
 	<code class="link-preview">{buildDuelLink(seed)}</code>
-</div>
+</section>
 
 <style>
 	.share-duel {
-		background: rgba(45, 106, 79, 0.12);
+		border-radius: var(--radius-lg);
 		border: 1px solid var(--accent);
-		border-radius: var(--radius);
-		padding: 1rem;
-		margin: 1rem 0;
+		background:
+			linear-gradient(135deg, rgba(45, 106, 79, 0.15), transparent 60%),
+			var(--surface);
+		padding: var(--space-4);
+		margin: var(--space-4) 0;
+		text-align: center;
 	}
 
-	p {
-		margin: 0 0 0.75rem;
-		font-size: 0.88rem;
+	.kicker {
+		margin: 0 0 var(--space-2);
+		font-size: var(--text-xs);
+		text-transform: uppercase;
+		letter-spacing: 0.12em;
+		color: var(--gold);
+		font-weight: 700;
+	}
+
+	.body {
+		margin: 0 0 var(--space-3);
+		font-size: var(--text-sm);
 		color: var(--muted);
-	}
-
-	button {
-		width: 100%;
-		margin-bottom: 0.5rem;
+		line-height: 1.45;
 	}
 
 	.link-preview {
 		display: block;
-		font-size: 0.65rem;
+		margin-top: var(--space-2);
+		font-size: 0.62rem;
 		color: var(--muted);
 		word-break: break-all;
 	}

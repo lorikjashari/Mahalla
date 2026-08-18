@@ -8,80 +8,52 @@
 	}
 
 	let { causes, minutesPct }: Props = $props();
+
+	const headline = $derived(minutesPct >= 50 ? sq.causePlay : sq.causeBench);
+
+	const summary = $derived.by(() => {
+		const top = [...causes].sort((a, b) => Math.abs(b.value) - Math.abs(a.value))[0];
+		if (!top) return '';
+		if (minutesPct >= 50) {
+			return `${top.label} ndikon pozitivisht — ${minutesPct}% minuta sezonin e kaluar.`;
+		}
+		return `${top.label} po të pengon — vetëm ${minutesPct}% minuta.`;
+	});
+
+	const topCauses = $derived([...causes].sort((a, b) => Math.abs(b.value) - Math.abs(a.value)).slice(0, 3));
 </script>
 
-<div class="cause-panel">
-	<h3>{sq.causePanel}</h3>
-	<div class="minutes-bar">
-		<div class="fill" style="width:{minutesPct}%"></div>
-	</div>
-	<p class="pct">{minutesPct}% minuta</p>
-	<ul>
-		{#each causes as c (c.label)}
-			<li class:pos={c.positive} class:neg={!c.positive}>
+<section class="cause-scene" aria-labelledby="cause-title">
+	<p class="kicker" id="cause-title">{headline}</p>
+	<p class="body-story">{summary}</p>
+
+	<div class="info-rail">
+		<div class="info-rail-item">
+			<span>{sq.minutes}</span>
+			<strong>{minutesPct}%</strong>
+		</div>
+		{#each topCauses as c (c.label)}
+			<div class="info-rail-item">
 				<span>{c.label}</span>
-				<span>{c.value > 0 ? '+' : ''}{c.value}%</span>
-			</li>
+				<strong class:pos={c.positive} class:neg={!c.positive}>
+					{c.value > 0 ? '+' : ''}{c.value}
+				</strong>
+			</div>
 		{/each}
-	</ul>
-</div>
+	</div>
+</section>
 
 <style>
-	.cause-panel {
-		background: var(--surface);
-		border: 1px solid var(--border);
-		border-radius: var(--radius);
-		padding: 1rem;
+	.cause-scene {
+		padding: var(--space-4) 0;
+		border-top: 1px solid var(--line);
 	}
 
-	h3 {
-		margin: 0 0 0.75rem;
-		font-size: 0.95rem;
-		color: var(--gold);
+	.pos {
+		color: var(--success);
 	}
 
-	.minutes-bar {
-		height: 8px;
-		background: var(--border);
-		border-radius: 99px;
-		overflow: hidden;
-	}
-
-	.fill {
-		height: 100%;
-		background: linear-gradient(90deg, var(--accent), var(--gold));
-		border-radius: 99px;
-		transition: width 0.4s ease;
-	}
-
-	.pct {
-		margin: 0.35rem 0 0.75rem;
-		font-size: 0.8rem;
-		color: var(--muted);
-	}
-
-	ul {
-		list-style: none;
-		padding: 0;
-		margin: 0;
-		display: grid;
-		gap: 0.35rem;
-	}
-
-	li {
-		display: flex;
-		justify-content: space-between;
-		font-size: 0.85rem;
-		padding: 0.35rem 0.5rem;
-		border-radius: 6px;
-		background: rgba(255, 255, 255, 0.03);
-	}
-
-	.pos span:last-child {
-		color: #52b788;
-	}
-
-	.neg span:last-child {
-		color: #e76f51;
+	.neg {
+		color: var(--danger);
 	}
 </style>

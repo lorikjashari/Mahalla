@@ -1,0 +1,404 @@
+/* MAHALLA — Game composition system */
+
+html,
+body {
+	background: var(--canvas-deep);
+}
+
+/* Pitch atmosphere — subtle, not cheesy */
+.pitch-bg {
+	position: relative;
+	isolation: isolate;
+}
+
+.pitch-bg::before {
+	content: '';
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	z-index: 0;
+	background:
+		radial-gradient(ellipse 80% 50% at 50% 100%, rgba(45, 106, 79, 0.08), transparent 60%),
+		repeating-linear-gradient(
+			90deg,
+			transparent,
+			transparent 79px,
+			rgba(255, 255, 255, 0.012) 79px,
+			rgba(255, 255, 255, 0.012) 80px
+		),
+		linear-gradient(180deg, var(--canvas-deep), var(--canvas));
+}
+
+.pitch-bg > * {
+	position: relative;
+	z-index: 1;
+}
+
+/* Full-screen scene */
+.scene {
+	min-height: min(78dvh, 720px);
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	padding: 0 0 var(--space-6);
+	animation: sceneIn var(--duration-cinematic) var(--ease-cine);
+}
+
+.scene--center {
+	justify-content: center;
+	text-align: center;
+	align-items: center;
+}
+
+.scene--match {
+	min-height: min(85dvh, 780px);
+	justify-content: space-between;
+	padding-top: var(--space-8);
+}
+
+/* Editorial type */
+.kicker {
+	margin: 0 0 var(--space-3);
+	font-size: var(--text-xs);
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.18em;
+	color: var(--gold-dim);
+}
+
+.kicker--live {
+	color: var(--live);
+}
+
+.kicker--green {
+	color: var(--accent-bright);
+}
+
+.display-xl {
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: var(--text-3xl);
+	line-height: 0.92;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.display-mega {
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: var(--text-mega);
+	line-height: 0.85;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+}
+
+.stat-huge {
+	font-family: var(--font-display);
+	font-size: clamp(3.5rem, 16vw, 6rem);
+	line-height: 0.85;
+	letter-spacing: -0.02em;
+}
+
+.stat-huge-label {
+	display: block;
+	margin-top: 0.15rem;
+	font-size: var(--text-xs);
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.16em;
+	color: var(--muted);
+}
+
+.body-story {
+	margin: 0;
+	max-width: 36ch;
+	font-size: clamp(1rem, 3.5vw, 1.15rem);
+	line-height: 1.6;
+	color: var(--text-dim);
+}
+
+.body-story--wide {
+	max-width: 42ch;
+}
+
+/* Information rail — not a card */
+.info-rail {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-4) var(--space-6);
+	padding: var(--space-4) 0;
+	border-top: 1px solid var(--line);
+	margin-top: var(--space-4);
+}
+
+.info-rail-item span {
+	display: block;
+	font-size: var(--text-2xs);
+	text-transform: uppercase;
+	letter-spacing: 0.12em;
+	color: var(--muted);
+}
+
+.info-rail-item strong {
+	font-family: var(--font-display);
+	font-size: var(--text-xl);
+	line-height: 1;
+}
+
+/* Bottom sheet — map attachment */
+.sheet {
+	padding: var(--space-5) var(--viewport-pad) calc(var(--space-6) + env(safe-area-inset-bottom));
+	background: linear-gradient(180deg, transparent, var(--canvas) 24%);
+}
+
+.sheet-panel {
+	padding: var(--space-5) var(--viewport-pad) var(--space-6);
+	background: linear-gradient(180deg, rgba(8, 11, 14, 0.55), rgba(8, 11, 14, 0.92));
+	backdrop-filter: blur(20px);
+	border-top: 1px solid var(--line-strong);
+}
+
+.sheet-title {
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: clamp(2rem, 8vw, 3rem);
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	line-height: 0.95;
+}
+
+.sheet-meta {
+	margin: var(--space-2) 0 0;
+	font-size: var(--text-sm);
+	color: var(--muted);
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+}
+
+.sheet-story {
+	margin: var(--space-3) 0 var(--space-5);
+	font-style: italic;
+	color: var(--gold-dim);
+	font-size: var(--text-md);
+}
+
+/* Career dock */
+.career-dock {
+	position: sticky;
+	bottom: 0;
+	z-index: var(--z-dock);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-3);
+	padding: var(--space-3) 0 calc(var(--space-3) + env(safe-area-inset-bottom));
+	margin-top: auto;
+	border-top: 1px solid var(--line);
+	background: linear-gradient(to top, var(--canvas) 70%, transparent);
+}
+
+.dock-btn {
+	min-height: var(--touch-min);
+	padding: 0 var(--space-3);
+	background: transparent;
+	border: none;
+	color: var(--muted);
+	font-size: var(--text-2xs);
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	font-weight: 700;
+}
+
+.dock-btn.is-active,
+.dock-btn:hover {
+	color: var(--text);
+}
+
+/* Choice stack — game decisions */
+.choice-stack {
+	display: grid;
+	gap: var(--space-2);
+	width: 100%;
+	max-width: 420px;
+}
+
+.choice-stack .game-btn {
+	min-height: 56px;
+	font-family: var(--font-display);
+	font-size: var(--text-lg);
+	letter-spacing: 0.08em;
+}
+
+/* Map scene */
+.map-scene {
+	position: relative;
+	width: 100%;
+	min-height: min(72dvh, 640px);
+	margin: calc(var(--space-4) * -1) calc(var(--viewport-pad) * -1) 0;
+	width: calc(100% + var(--viewport-pad) + var(--viewport-pad-r));
+}
+
+.map-canvas {
+	position: absolute;
+	inset: 0;
+}
+
+.map-vignette {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	background:
+		linear-gradient(180deg, rgba(5, 7, 8, 0.35) 0%, transparent 22%, transparent 55%, rgba(5, 7, 8, 0.92) 100%),
+		linear-gradient(90deg, rgba(5, 7, 8, 0.4), transparent 20%, transparent 80%, rgba(5, 7, 8, 0.4));
+}
+
+.map-step {
+	position: absolute;
+	top: var(--space-4);
+	left: var(--viewport-pad);
+	z-index: 2;
+	font-family: var(--font-display);
+	font-size: var(--text-lg);
+	color: var(--gold);
+	letter-spacing: 0.12em;
+}
+
+/* Home title */
+.home-canvas {
+	min-height: min(88dvh, 820px);
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	padding: var(--space-8) 0 var(--space-4);
+}
+
+.home-title-block {
+	padding-top: var(--space-10);
+}
+
+.home-actions {
+	display: grid;
+	gap: var(--space-2);
+	padding-bottom: var(--space-4);
+}
+
+.home-meta {
+	display: grid;
+	gap: var(--space-6);
+	margin: var(--space-8) 0;
+}
+
+.home-side {
+	display: grid;
+	gap: var(--space-6);
+	align-content: end;
+}
+
+/* Detail layer — progressive career info */
+.detail-section {
+	padding: var(--space-5) 0;
+	border-top: 1px solid var(--line);
+}
+
+.detail-kicker {
+	margin: 0 0 var(--space-3);
+	font-size: var(--text-2xs);
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.16em;
+	color: var(--gold-dim);
+}
+
+.meta-strip {
+	display: grid;
+	gap: var(--space-2);
+	padding: var(--space-4) 0;
+	border-top: 1px solid var(--line);
+	border-bottom: 1px solid var(--line);
+}
+
+.meta-strip-title {
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: var(--text-xl);
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	line-height: 0.95;
+}
+
+.meta-strip-hint {
+	margin: 0;
+	font-size: var(--text-sm);
+	color: var(--muted);
+	line-height: 1.45;
+	max-width: 36ch;
+}
+
+.rank-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: grid;
+	gap: 0;
+}
+
+.rank-list li {
+	display: flex;
+	gap: var(--space-3);
+	align-items: baseline;
+	padding: var(--space-3) 0;
+	border-bottom: 1px solid var(--line);
+}
+
+.rank-list li:last-child {
+	border-bottom: none;
+}
+
+.rank-num {
+	font-family: var(--font-display);
+	font-size: var(--text-lg);
+	color: var(--gold);
+	min-width: 2.5ch;
+	line-height: 1;
+}
+
+.rank-num--lead {
+	font-size: var(--text-2xl);
+}
+
+@keyframes sceneIn {
+	from {
+		opacity: 0;
+		transform: translateY(16px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@media (min-width: 900px) {
+	.scene {
+		min-height: min(70dvh, 680px);
+	}
+
+	.home-canvas {
+		display: grid;
+		grid-template-columns: 1.1fr 0.9fr;
+		gap: var(--space-10);
+		align-items: end;
+		min-height: min(82dvh, 760px);
+	}
+
+	.home-title-block {
+		padding-top: var(--space-16);
+	}
+
+	.home-actions {
+		align-self: end;
+	}
+
+	.home-side {
+		align-self: end;
+	}
+}

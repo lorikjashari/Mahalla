@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { toPng } from 'html-to-image';
+	import GameButton from '$lib/ui/GameButton.svelte';
+	import { sq } from '$lib/i18n/sq';
 
 	interface Props {
 		targetId?: string;
@@ -32,12 +34,6 @@
 	}
 </script>
 
-<button type="button" class="secondary share-png" disabled={busy} onclick={downloadPng}>
-	{done ? 'U shkarkua! ✓' : busy ? 'Duke krijuar…' : 'Shkarko karta PNG'}
-</button>
-
-<style>
-	.share-png {
-		width: 100%;
-	}
-</style>
+<GameButton variant="secondary" full disabled={busy} onclick={downloadPng}>
+	{done ? sq.legendDownloaded : busy ? sq.legendDownloading : sq.legendDownload}
+</GameButton>
